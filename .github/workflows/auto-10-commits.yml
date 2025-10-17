@@ -9,6 +9,7 @@ permissions:
 jobs:
   create-commits:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,10 +23,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create new branch
-        id: branch
+        id: create_branch
         run: |
           BRANCH="auto-commits-$(date -u +'%Y%m%dT%H%M%SZ')"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
           git checkout -b "$BRANCH"
 
       - name: Generate 10 commits
@@ -38,10 +39,8 @@ jobs:
           done
 
       - name: Push branch
-        env:
-          BRANCH: ${{ steps.branch.outputs.branch }}
         run: |
-          git push -u origin "$BRANCH"
+          git push -u origin "$BRANCH_NAME"
 
       - name: Done
-        run: echo "✅ Created 10 commits on branch: ${{ steps.branch.outputs.branch }}"
+        run: echo "✅ Created 10 commits on branch: $BRANCH_NAME"
