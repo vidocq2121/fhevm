@@ -1,0 +1,47 @@
+name: Auto 10 commits (manual)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  create-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create new branch
+        id: branch
+        run: |
+          BRANCH="auto-commits-$(date -u +'%Y%m%dT%H%M%SZ')"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          git checkout -b "$BRANCH"
+
+      - name: Generate 10 commits
+        run: |
+          for i in $(seq 1 10); do
+            FILE="auto_commit_${i}.txt"
+            echo "Auto commit #$i generated on $(date -u)" > "$FILE"
+            git add "$FILE"
+            git commit -m "automation: add $FILE"
+          done
+
+      - name: Push branch
+        env:
+          BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
+          git push -u origin "$BRANCH"
+
+      - name: Done
+        run: echo "✅ Created 10 commits on branch: ${{ steps.branch.outputs.branch }}"
