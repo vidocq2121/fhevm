@@ -1,4 +1,4 @@
-name: Auto 10 commits (manual)
+name: Auto 10 Commits
 
 on:
   workflow_dispatch:
@@ -16,29 +16,21 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Configure Git
+      - name: Set up Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Create new branch
+      - name: Create new branch and 10 commits
         run: |
           BRANCH="auto-commits-$(date -u +'%Y%m%dT%H%M%SZ')"
-          echo "BRANCH_NAME=$BRANCH" >> $GITHUB_ENV
           git checkout -b "$BRANCH"
 
-      - name: Generate 10 commits
-        run: |
           for i in $(seq 1 10); do
             FILE="auto_commit_${i}.txt"
-            echo "Auto commit #$i generated on $(date -u)" > "$FILE"
+            echo "Auto commit #$i at $(date -u)" > "$FILE"
             git add "$FILE"
             git commit -m "automation: add $FILE"
           done
 
-      - name: Push branch
-        run: |
-          git push -u origin "$BRANCH_NAME"
-
-      - name: Done
-        run: echo "✅ Created 10 commits on branch: $BRANCH_NAME"
+          git push -u origin "$BRANCH"
